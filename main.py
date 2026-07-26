@@ -8,7 +8,7 @@ LIVES = 3
 
 def main():
   board = Board(ROWS, COLS)
-  arrows_n = board.fill(ARROWS_MAX)
+  arrows_n = board.fill(ARROWS_MAX//2)
   lives = LIVES
   game_over = False
 

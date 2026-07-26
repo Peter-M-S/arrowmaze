@@ -1,6 +1,7 @@
 import random
 
 from arrow import Arrow
+from generators.board_generator import generate_arrows_list
 
 DIRECTIONS = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 EMPTY = "."
@@ -21,7 +22,15 @@ class Board:
     print()
 
   def fill(self, n_max):
-    self.fill_by_random(n_max)
+    n = self.fill_by_segments(n_max)
+    # if not n: self.fill_by_random(n_max)
+
+  def fill_by_segments(self, n_max) -> int:
+    arrow_list: list = generate_arrows_list(self.rows, self.cols, n_max)
+    for i, points in enumerate(arrow_list):
+      self.arrows.add(Arrow(points, i))
+      for p in points: self.free.remove(p)
+    self.update_tiles()
 
   def fill_by_random(self, n_max: int = 26) -> int:
     for i in range(n_max):
@@ -66,7 +75,7 @@ class Board:
 
 
 if __name__ == '__main__':
-  board = Board(6, 12)
+  board = Board(6, 10)
   for i in range(3):
     r, c = random.choice(list(board.free))
     board.add_arrow(r, c, i)

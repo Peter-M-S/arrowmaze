@@ -1,12 +1,14 @@
-import os
 import random
 import re
+from pathlib import Path
 
 
 def _get_hamilton_path(rows:int, cols: int) -> list:
+  CWD = Path(__file__).parent
   filename = f"hamilton_{rows}x{cols}.txt"
-  if filename in os.listdir("paths"):
-    with open("paths/" + filename, "r") as f:
+  filepath = CWD / "paths" / filename
+  if filepath.exists():
+    with open(filepath, "r") as f:
       line = random.choice(f.readlines())
       path = [tuple(map(int, s.split(","))) for s in re.findall(r"(\d+, \d+)", line)]
       return path
@@ -21,6 +23,8 @@ def _path_to_arrows(path, n_max) -> list:
       return []
     if n_max > length//2:
       raise ValueError("n_max > length//2, so some arrows will be too short")
+    if n_max > 62:
+      raise ValueError("n_max > 62, not enough single character tails")
 
     base, rem = divmod(length, n_max)
     segments = []
@@ -34,16 +38,14 @@ def _path_to_arrows(path, n_max) -> list:
     return arrows_points
 
 
-def generate_board(rows: int, cols: int, n_max: int) -> list:
+def generate_arrows_list(rows: int, cols: int, n_max: int) -> list:
   path = _get_hamilton_path(rows, cols)
-  random_index = random.randint(0, len(path)-1)
-  path = path[random_index:] + path[random_index:]
   return _path_to_arrows(path, n_max)
 
 
 if __name__ == '__main__':
 
-   print(generate_board(rows=6, cols=5, n_max=8))
+   print(generate_arrows_list(rows=6, cols=5, n_max=8))
 
 
 
