@@ -3,7 +3,7 @@ import random
 import re
 
 
-def get_hamilton_path(rows:int , cols: int) -> list:
+def _get_hamilton_path(rows:int, cols: int) -> list:
   filename = f"hamilton_{rows}x{cols}.txt"
   if filename in os.listdir("paths"):
     with open("paths/" + filename, "r") as f:
@@ -15,36 +15,36 @@ def get_hamilton_path(rows:int , cols: int) -> list:
     return []
 
 
-def path_to_segments(path):
-  """
-  Zerlegt einen Pfad in seine 'Richtungssegmente' (für spätere Pfeil-Erkennung).
-  Gibt Liste von (start_index, end_index, direction) zurück.
-  """
-  if len(path) < 2:
-    return []
+def _path_to_arrows(path, n_max) -> list:
+    length = len(path)
+    if n_max < 0:
+      return []
+    if n_max > length//2:
+      raise ValueError("n_max > length//2, so some arrows will be too short")
 
-  def direction(a, b):
-    dr, dc = b[0] - a[0], b[1] - a[1]
-    return (dr, dc)
+    base, rem = divmod(length, n_max)
+    segments = []
+    idx = 0
+    for i in range(n_max):
+      seg_len = base + (1 if i < rem else 0)
+      segments.append(path[idx: idx + seg_len])
+      idx += seg_len
 
-  segments = []
-  seg_start = 0
-  current_dir = direction(path[0], path[1])
+    arrows_points = [list(reversed(seg)) for seg in segments]
+    return arrows_points
 
-  for i in range(1, len(path) - 1):
-    d = direction(path[i], path[i + 1])
-    if d != current_dir:
-      segments.append((seg_start, i, current_dir))
-      seg_start = i
-      current_dir = d
-  segments.append((seg_start, len(path) - 1, current_dir))
-  return segments
+
+def generate_board(rows: int, cols: int, n_max: int) -> list:
+  path = _get_hamilton_path(rows, cols)
+  random_index = random.randint(0, len(path)-1)
+  path = path[random_index:] + path[random_index:]
+  return _path_to_arrows(path, n_max)
 
 
 if __name__ == '__main__':
-   path = get_hamilton_path(6,5)
-   segments = path_to_segments(path)
 
-   
+   print(generate_board(rows=6, cols=5, n_max=8))
+
+
 
 
