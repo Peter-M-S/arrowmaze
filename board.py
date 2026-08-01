@@ -16,6 +16,7 @@ class Board:
     self.arrows: set = set()
 
   def display_board(self):
+    # todo identify movable arrows and assign tails only temporarily to them
     for (r, c), s in self.tiles.items():
       print(s, end="")
       if c == self.cols - 1: print(end="\n")
@@ -25,7 +26,7 @@ class Board:
     n = self.fill_by_segments(n_max)
     # if not n: self.fill_by_random(n_max)
 
-  def fill_by_segments(self, n_max) -> int:
+  def fill_by_segments(self, n_max) -> None:
     arrow_list: list = generate_arrows_list(self.rows, self.cols, n_max)
     for i, points in enumerate(arrow_list):
       self.arrows.add(Arrow(points, i))
@@ -75,6 +76,7 @@ class Board:
 
 
 if __name__ == '__main__':
+  # test for board class
   board = Board(6, 10)
   for i in range(3):
     r, c = random.choice(list(board.free))

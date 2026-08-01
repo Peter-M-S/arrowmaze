@@ -2,6 +2,8 @@ import random
 import re
 from pathlib import Path
 
+HAMILTON = False
+
 
 def _get_hamilton_path(rows:int, cols: int) -> list:
   CWD = Path(__file__).parent
@@ -12,6 +14,20 @@ def _get_hamilton_path(rows:int, cols: int) -> list:
       line = random.choice(f.readlines())
       path = [tuple(map(int, s.split(","))) for s in re.findall(r"(\d+, \d+)", line)]
       return path
+  else:
+    print("File not found")
+    return []
+
+
+def _get_arrowwalker_points(rows:int, cols: int) -> list:
+  CWD = Path(__file__).parent
+  filename = f"arrowwalker_{rows}x{cols}.txt"
+  filepath = CWD / "paths" / filename
+  if filepath.exists():
+    with (open(filepath, "r") as f):
+      lines = f.readlines()
+      arrows_points = eval(random.choice(lines))
+      return arrows_points
   else:
     print("File not found")
     return []
@@ -39,13 +55,16 @@ def _path_to_arrows(path, n_max) -> list:
 
 
 def generate_arrows_list(rows: int, cols: int, n_max: int) -> list:
-  path = _get_hamilton_path(rows, cols)
-  return _path_to_arrows(path, n_max)
+  if HAMILTON:
+    path = _get_hamilton_path(rows, cols)
+    return _path_to_arrows(path, n_max)
+  else:
+    return _get_arrowwalker_points(rows, cols)
 
 
 if __name__ == '__main__':
-
-   print(generate_arrows_list(rows=6, cols=5, n_max=8))
+  # test generator
+  print(generate_arrows_list(rows=5, cols=10, n_max=8))
 
 
 

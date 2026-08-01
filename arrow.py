@@ -56,10 +56,12 @@ class Arrow:
     self.symbols[self.points[1]] = LINE[(self.dr, self.dc, self.dr, self.dc)]  # hori or verti at 2nd
     del self.symbols[self.points[-1]]
     self.points.pop()
+    # todo rewrite to del self.symbols[self.points.pop()] ?
     self.symbols[self.points[-1]] = self.tail
 
 
 if __name__ == '__main__':
+  # test for Arrow class
     arrow = Arrow([(0,3), (0,2), (0,1), (0,0)], 0)
     print(arrow.dr, arrow.dc)
     print(arrow.points)

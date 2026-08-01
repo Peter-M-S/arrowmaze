@@ -1,7 +1,7 @@
 from board import Board
 from arrow import Arrow
 
-ROWS,COLS = 6, 10
+ROWS,COLS = 15, 15
 ARROWS_MAX = int(ROWS*COLS/2)
 LIVES = 3
 
