@@ -21,7 +21,8 @@ def _get_hamilton_path(rows:int, cols: int) -> list:
 
 def _get_arrowwalker_points(rows:int, cols: int) -> list:
   CWD = Path(__file__).parent
-  filename = f"arrowwalker_{rows}x{cols}.txt"
+  # filename = f"arrowwalker_{rows}x{cols}.txt"
+  filename = f"solvable_{rows}x{cols}.txt"
   filepath = CWD / "paths" / filename
   if filepath.exists():
     with (open(filepath, "r") as f):

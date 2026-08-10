@@ -1,18 +1,18 @@
 from board import Board
 from arrow import Arrow
 
-ROWS,COLS = 15, 15
-ARROWS_MAX = int(ROWS*COLS/2)
+ROWS = COLS = 15
 LIVES = 3
 
 
 def main():
   board = Board(ROWS, COLS)
-  arrows_n = board.fill(ARROWS_MAX//2)
+  board.fill()
   lives = LIVES
   game_over = False
 
   board.display_board()
+
   while not game_over:
     s = input("enter your choice: ")
     if s not in Arrow.TAILS:
@@ -23,12 +23,12 @@ def main():
     if arrow.color != 'white':
       print("arrow died")
       continue
-    if arrow.points[-1] not in board.tiles:
+    if arrow.positions[-1] not in board.tiles:
       print("arrow is already out")
       continue
 
     if board.can_move_out(arrow):
-      while arrow.points[-1] in board.tiles:
+      while arrow.positions[-1] in board.tiles:
         arrow.move()
         board.update_tiles()
       board.display_board()
@@ -39,7 +39,7 @@ def main():
       board.display_board()
 
     else:
-      arrow.color = 'red'
+      # arrow.color = 'red'
       lives -= 1
       print(f"arrow {arrow.tail} blocked. lives: {lives}")
 
@@ -54,8 +54,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# todo generate solvable puzzles (no blocking arrows)
-# todo use all fields for generating arrows
-
 
