@@ -63,7 +63,6 @@ def bump_arrows(g: Grid) -> tuple:
         if npos in g.free:
           # found valid npos
           break  # for
-
       else:
         break  # while        # cannot grow arrow anymore
 
@@ -75,7 +74,7 @@ def bump_arrows(g: Grid) -> tuple:
 
     # print(arrow)
     arrows.append(tuple(arrow))
-  return tuple(arrows)
+  return tuple(sorted(arrows))
 
 
 def get_cycles(grid: Grid, arrows: tuple) -> list:
@@ -105,18 +104,21 @@ def get_cycles(grid: Grid, arrows: tuple) -> list:
 
 
 if __name__ == '__main__':
-  ROWS = COLS = 15
-  MAX_LENGTH = 15
+  ROWS = COLS = 20
+  MAX_LENGTH = 40
   MAX_TRIALS: int = 1_000_000
 
   max_solvables: int = 10
   solvables: int = 0
+  grid: Grid = Grid(ROWS, COLS)
+  seen: set = set()
 
   for i in range(MAX_TRIALS):
-    grid: Grid = Grid(ROWS, COLS)
+    if not i % 100: print(i, seen.__sizeof__()//1e3, "kByte")
+    grid.reset()
     arrows = bump_arrows(grid)
-    if not i % 100: print(i)
-
+    if arrows in seen: continue
+    seen.add(arrows)
     cycles = get_cycles(grid, arrows)
     if 0 < len(cycles) < 5:
       print(f"found {len(cycles)} cycles")

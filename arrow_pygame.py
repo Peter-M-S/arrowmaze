@@ -67,7 +67,6 @@ class Arrow:
 
     self.draw()
 
-
   def draw(self):
     self.draw_head(self.vertices[0])
     for p0, p1 in zip(self.vertices[:-1], self.vertices[1:]):
@@ -82,7 +81,7 @@ class Arrow:
     if -delta <= nx < self.layer.get_width() + delta and -delta <= ny < self.layer.get_height() + delta:
       self.vertices[0] = (nx, ny)
 
-    # move tail to next segment or pop points
+    # move tail to next vertex
     x0, y0 = self.vertices[-1]
     x1, y1 = self.vertices[-2]
     dx, dy = self.tail_direction

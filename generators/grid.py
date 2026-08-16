@@ -26,6 +26,10 @@ class Grid:
   def free(self) -> set:
     return self.grid.keys() - self.full
 
+  def reset(self) -> None:
+    for pos in self.grid:
+      self.grid[pos] = False
+
 
 if __name__ == '__main__':
   pass
