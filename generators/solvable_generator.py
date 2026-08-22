@@ -9,8 +9,11 @@ from generators.grid import Grid
 CWD = Path(__file__).parent.parent
 
 
-def _save(arrows: tuple):
-  filepath = CWD / f"puzzles/solvable_{ROWS}x{COLS}.txt"
+def _save(arrows: tuple, cycles: int = 0):
+  if cycles:
+    filepath = CWD / f"puzzles/with_{cycles}_cycles_{ROWS}x{COLS}.txt"
+  else:
+    filepath = CWD / f"puzzles/solvable_{ROWS}x{COLS}.txt"
   with open(filepath, "a+") as f:
     f.write(str(arrows) + "\n")
   print("file saved")
@@ -86,8 +89,9 @@ def get_cycles(grid: Grid, arrows: tuple) -> list:
   """
   DiG = nx.DiGraph()
 
-  for arrow_B, arrow in enumerate(arrows):
+  for arrow in arrows:
     pos, lpos = arrow[:2]
+    arrow_B = grid.grid[pos].arrow_idx
     dr, dc = pos[0]-lpos[0], pos[1]-lpos[1]
     pos = pos[0] + dr, pos[1] + dc
     while pos in grid.grid:
@@ -105,7 +109,7 @@ def get_cycles(grid: Grid, arrows: tuple) -> list:
 
 if __name__ == '__main__':
   ROWS = COLS = 20
-  MAX_LENGTH = 40
+  MAX_LENGTH = 2*ROWS
   MAX_TRIALS: int = 1_000_000
 
   max_solvables: int = 10
@@ -114,17 +118,19 @@ if __name__ == '__main__':
   seen: set = set()
 
   for i in range(MAX_TRIALS):
-    if not i % 100: print(i, seen.__sizeof__()//1e3, "kByte")
+    if not i % 1000: print(i, seen.__sizeof__()//1e3, "kByte")
     grid.reset()
     arrows = bump_arrows(grid)
     if arrows in seen: continue
     seen.add(arrows)
-    cycles = get_cycles(grid, arrows)
-    if 0 < len(cycles) < 5:
-      print(f"found {len(cycles)} cycles")
-      continue
-    elif len(cycles) >= 5:
-      continue
+    if get_cycles(grid, arrows): continue
+    # cycles = get_cycles(grid, arrows)
+    # if 0 < len(cycles) < 5:
+    #   # print(f"found {len(cycles)} cycles")
+    #   # _save(arrows, len(cycles))
+    #   continue
+    # elif len(cycles) >= 5:
+    #   continue
 
     print("found valid set of arrows:")
     print(arrows)
@@ -133,5 +139,4 @@ if __name__ == '__main__':
     if solvables >= max_solvables:
       break
 
-  # found 5 so far
   print(f"found {solvables} solvables")

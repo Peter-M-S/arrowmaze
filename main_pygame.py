@@ -28,7 +28,7 @@ def get_grid_sizes() -> list:
   check_path = CWD / "puzzles"
   for filename in check_path.glob("solvable_*.txt"):
     sizes.append(tuple(map(int, re.findall(r"\d+", str(filename)))))
-  return sizes
+  return [(15,15)]
 
 
 def init_puzzle() -> tuple[set, dict, list, set, pg.Surface]:
@@ -67,7 +67,6 @@ def init_puzzle() -> tuple[set, dict, list, set, pg.Surface]:
 def main() -> None:
 
   free, tiles, arrows, lost_lives, background = init_puzzle()
-  selected_arrow = []
 
   while True:
     clock.tick(FPS)
