@@ -1,22 +1,26 @@
 import re
 import time
+from typing import Any, Generator
 
 import pygame as pg
-import random
+
 from pathlib import Path
+
+from pygame import Surface
 
 from arrow_pygame import Arrow
 
 
-def get_puzzle(rows, cols) -> list:
+def get_puzzles(rows, cols) -> list:
   CWD = Path(__file__).parent
   filename = f"solvable_{rows}x{cols}.txt"
   filepath = CWD / "puzzles" / filename
   if filepath.exists():
+    puzzles = []
     with (open(filepath, "r") as f):
-      lines = f.readlines()
-      puzzle = eval(random.choice(lines))
-    return puzzle
+      for line in f.readlines():
+        puzzles.append(eval(line))
+    return puzzles
   else:
     print("File not found")
     return []
@@ -28,45 +32,54 @@ def get_grid_sizes() -> list:
   check_path = CWD / "puzzles"
   for filename in check_path.glob("solvable_*.txt"):
     sizes.append(tuple(map(int, re.findall(r"\d+", str(filename)))))
-  return [(15,15)]
+  return sorted(sizes)
 
 
-def init_puzzle() -> tuple[set, dict, list, set, pg.Surface]:
-  ROWS, COLS = random.choice(get_grid_sizes())  # number of tiles
-  TILE_SIZE = min(30, int(height / ROWS), int(width / COLS))
-  THICK = TILE_SIZE // 4
-  BOARD_SIZE = ((COLS * TILE_SIZE), (ROWS * TILE_SIZE))  # number of pixel
-  X_OFFSET, Y_OFFSET = (width - BOARD_SIZE[0]) // 2, (height - BOARD_SIZE[1]) // 2
+def init_puzzle() -> Generator[tuple[set[Any], dict[Any, Any], list[Arrow], set[Any], Surface], Any, None]:
+  for ROWS, COLS in get_grid_sizes():  # number of tiles
+    if max(ROWS, COLS) < MIN_LEVEL: continue
+    TILE_SIZE = min(30, int(height / ROWS), int(width / COLS))
+    THICK = TILE_SIZE // 4
+    BOARD_SIZE = ((COLS * TILE_SIZE), (ROWS * TILE_SIZE))  # number of pixel
+    X_OFFSET, Y_OFFSET = (width - BOARD_SIZE[0]) // 2, (height - BOARD_SIZE[1]) // 2
 
-  free: set = set()
-  tiles: dict = {}
-  lost_lives: set = set()
-  background = pg.Surface(size)
-  background.fill(BG_COLOR)
-  for r in range(ROWS):
-    for c in range(COLS):
-      free.add((r, c))
-      x = X_OFFSET + TILE_SIZE // 2 + c * TILE_SIZE
-      y = Y_OFFSET + TILE_SIZE // 2 + r * TILE_SIZE
-      pg.draw.line(background, "black", (x - 1, y), (x + 1, y), 1)
-      pg.draw.line(background, "black", (x, y - 1), (x, y + 1), 1)
-      tile_rect = pg.Rect(0, 0, TILE_SIZE, TILE_SIZE)
-      tile_rect.center = (x, y)
-      tiles[(r, c)] = tile_rect
+    free: set = set()
+    tiles: dict = {}
+    lost_lives: set = set()
+    background = pg.Surface(size)
+    background.fill(BG_COLOR)
+    for r in range(ROWS):
+      for c in range(COLS):
+        free.add((r, c))
+        x = X_OFFSET + TILE_SIZE // 2 + c * TILE_SIZE
+        y = Y_OFFSET + TILE_SIZE // 2 + r * TILE_SIZE
+        pg.draw.line(background, "black", (x - 1, y), (x + 1, y), 1)
+        pg.draw.line(background, "black", (x, y - 1), (x, y + 1), 1)
+        tile_rect = pg.Rect(0, 0, TILE_SIZE, TILE_SIZE)
+        tile_rect.center = (x, y)
+        tiles[(r, c)] = tile_rect
 
-  # general Arrow settings
-  Arrow.thickness = THICK
-  Arrow.layer = pg.Surface(size, pg.SRCALPHA)
-  puzzle = get_puzzle(ROWS, COLS)  # list or tuple of tuples of all points in arrow
-  arrows = [Arrow(arrow, tiles) for arrow in puzzle]
-  for a in arrows:
-    free -= set(a.positions)
-  return free, tiles, arrows, lost_lives, background
+    # general Arrow settings
+    Arrow.thickness = THICK
+    Arrow.layer = pg.Surface(size, pg.SRCALPHA)
+    for puzzle in get_puzzles(ROWS, COLS):  # list or tuple of tuples of all points in arrow
+      arrows = [Arrow(arrow, tiles) for arrow in puzzle]
+      for a in arrows:
+        free -= set(a.positions)
+      yield free, tiles, arrows, lost_lives, background
+  return None
 
 
 def main() -> None:
 
-  free, tiles, arrows, lost_lives, background = init_puzzle()
+  puzzle_generator = init_puzzle()
+
+  try:
+    puzzle = next(puzzle_generator)
+    free, tiles, arrows, lost_lives, background = puzzle
+  except StopIteration:
+    print("all levels done")
+    return
 
   while True:
     clock.tick(FPS)
@@ -77,9 +90,14 @@ def main() -> None:
     pg.display.set_caption("ArrowMaze  " + " live " * (3-len(lost_lives)))
 
     if len(lost_lives) >= 3 or not arrows:
-      free, tiles, arrows, lost_lives, background = init_puzzle()
       time.sleep(3)
-      continue
+      try:
+        puzzle = next(puzzle_generator)
+        free, tiles, arrows, lost_lives, background = puzzle
+        continue
+      except StopIteration:
+        print("All levels done")
+        return
 
     m_pos = pg.mouse.get_pos()
     tile = [pos for pos, rect in tiles.items() if rect.collidepoint(m_pos)]
@@ -111,5 +129,5 @@ if __name__ == '__main__':
   clock = pg.time.Clock()
   FPS = 100
   BG_COLOR = "grey90"
-
+  MIN_LEVEL = 12
   main()
