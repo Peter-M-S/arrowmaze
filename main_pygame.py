@@ -124,10 +124,10 @@ def main() -> None:
 
 if __name__ == '__main__':
   pg.init()
-  size = width, height = 800, 800
+  size = width, height = 1000, 1000
   window = pg.display.set_mode(size)
   clock = pg.time.Clock()
   FPS = 100
   BG_COLOR = "grey90"
-  MIN_LEVEL = 12
+  MIN_LEVEL = 6
   main()

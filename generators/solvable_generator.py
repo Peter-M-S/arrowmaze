@@ -35,10 +35,10 @@ def bump_arrows(g: Grid) -> tuple:
   arrows: list = []
   seen: set = set()
 
-  while g.free - seen:
-    pos = random.choice(list(g.free - seen))   # potential head
+  while g.free_cells - seen:
+    pos = random.choice(list(g.free_cells - seen))   # potential head
     for npos in g.neighbors[pos]:
-      if npos in g.free:                # arrow with at least 2 points
+      if npos in g.free_cells:                # arrow with at least 2 points
         break  # for
 
     else:
@@ -51,11 +51,11 @@ def bump_arrows(g: Grid) -> tuple:
 
     head_idx: int = len(arrow)
     direction = pos[0]-npos[0], pos[1]-npos[1]
-    g.grid[pos] = Cell(pos, arrow_idx, head_idx, direction)
+    g.cells[pos] = Cell(pos, arrow_idx, head_idx, direction)
     arrow.append(pos)
 
     head_idx = len(arrow)
-    g.grid[npos] = Cell(npos, arrow_idx, head_idx, direction)
+    g.cells[npos] = Cell(npos, arrow_idx, head_idx, direction)
     arrow.append(npos)
 
     pos = npos
@@ -63,7 +63,7 @@ def bump_arrows(g: Grid) -> tuple:
     while len(arrow) < MAX_LENGTH:
 
       for npos in g.neighbors[pos]:
-        if npos in g.free:
+        if npos in g.free_cells:
           # found valid npos
           break  # for
       else:
@@ -71,7 +71,7 @@ def bump_arrows(g: Grid) -> tuple:
 
       head_idx = len(arrow)
       direction = pos[0]-npos[0], pos[1]-npos[1]
-      g.grid[npos] = Cell(npos, arrow_idx, head_idx, direction)
+      g.cells[npos] = Cell(npos, arrow_idx, head_idx, direction)
       arrow.append(npos)
       pos = npos
 
@@ -91,12 +91,12 @@ def get_cycles(grid: Grid, arrows: tuple) -> list:
 
   for arrow in arrows:
     pos, lpos = arrow[:2]
-    arrow_B = grid.grid[pos].arrow_idx
+    arrow_B = grid.cells[pos].arrow_idx
     dr, dc = pos[0]-lpos[0], pos[1]-lpos[1]
     pos = pos[0] + dr, pos[1] + dc
-    while pos in grid.grid:
-      if grid.grid[pos]:
-        arrow_A = grid.grid[pos].arrow_idx
+    while pos in grid.cells:
+      if grid.cells[pos]:
+        arrow_A = grid.cells[pos].arrow_idx
         DiG.add_edge(arrow_A, arrow_B)
         if len(list(nx.simple_cycles(DiG))) >= 5:
           return [0]*5
@@ -109,7 +109,7 @@ def get_cycles(grid: Grid, arrows: tuple) -> list:
 
 if __name__ == '__main__':
   ROWS = COLS = 20
-  MAX_LENGTH = 2*ROWS
+  MAX_LENGTH = 2*ROWS + 5
   MAX_TRIALS: int = 1_000_000
 
   max_solvables: int = 10
@@ -118,7 +118,7 @@ if __name__ == '__main__':
   seen: set = set()
 
   for i in range(MAX_TRIALS):
-    if not i % 1000: print(i, seen.__sizeof__()//1e3, "kByte")
+    if not i % 1000: print(i, seen.__sizeof__()//1e6, "MB")
     grid.reset()
     arrows = bump_arrows(grid)
     if arrows in seen: continue
