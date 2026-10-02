@@ -129,5 +129,5 @@ if __name__ == '__main__':
   clock = pg.time.Clock()
   FPS = 100
   BG_COLOR = "grey90"
-  MIN_LEVEL = 6
+  MIN_LEVEL = 40
   main()
