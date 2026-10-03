@@ -1,3 +1,4 @@
+import os
 import re
 import time
 from typing import Any, Generator
@@ -24,6 +25,14 @@ def get_puzzles(rows, cols) -> list:
   else:
     print("File not found")
     return []
+
+
+def get_min_level() -> int:
+  levels = []
+  for filename in os.listdir("./puzzles"):
+    levels.append(filename.split("_")[1].split("x")[0])
+  levels.sort()
+  return int(input(f"Startlevel ({', '.join(levels)}):").strip() or levels[0])
 
 
 def get_grid_sizes() -> list:
@@ -89,11 +98,17 @@ def main() -> None:
 
     pg.display.set_caption("ArrowMaze  " + " live " * (3-len(lost_lives)))
 
-    if len(lost_lives) >= 3 or not arrows:
+    if len(lost_lives) >= 3:
+      time.sleep(3)
+      print("Game Over")
+      return
+
+    if not arrows:
       time.sleep(3)
       try:
         puzzle = next(puzzle_generator)
         free, tiles, arrows, lost_lives, background = puzzle
+        lost_lives = set()
         continue
       except StopIteration:
         print("All levels done")
@@ -123,11 +138,11 @@ def main() -> None:
 
 
 if __name__ == '__main__':
+  MIN_LEVEL = get_min_level()
   pg.init()
   size = width, height = 1000, 1000
   window = pg.display.set_mode(size)
   clock = pg.time.Clock()
   FPS = 100
   BG_COLOR = "grey90"
-  MIN_LEVEL = 40
   main()

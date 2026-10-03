@@ -206,6 +206,6 @@ def main(levels: tuple):
 
 
 if __name__ == '__main__':
-  # levels = (10, 15, 20, 30, 40)
-  levels = (20,)
+  levels = (10, 15, 20, 30, 40)
+  # levels = (20,)
   main(levels)
